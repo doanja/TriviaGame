@@ -39,21 +39,28 @@ const renderAnswers = (parentElement, num, answr) => {
   parentElement.append(col);
 };
 
-const loadGame = (problem = dict[Math.floor(Math.random() * dict.length)]) => {
-  questionInterval = setInterval(timeForCurrentQuestion, 1000); // calls timeForCurentQuestion every 1 sec
-  console.log('loadGame() is called');
+/**
+ * function to randomly select a question: answer set, render them and check for game logic
+ * @param {object} problem a random object containing an answer with an array of answers
+ */
+const loadQstn = (problem = dict[Math.floor(Math.random() * dict.length)]) => {
+  // timer countdown for each question
+  questionInterval = setInterval(timeForCurrentQuestion, 1000);
 
-  $('#answersWrap').empty(); // clear previous question (if any)
+  // clear previous question (if any)
+  $('#answersWrap').empty();
 
-  renderQuestion($('#answersWrap'), problem.question); // renders the question
+  // renders the question
+  renderQuestion($('#answersWrap'), problem.question);
 
   // create a mutable copy of problem.answers
   const copyOfAnswers = [...problem.answers];
 
   // render the answers
   for (let i = 0; i < 4; i++) {
+    // grab a random answer
     const randomizedAnswer =
-      copyOfAnswers[Math.floor(Math.random() * copyOfAnswers.length)]; // grab a random answer
+      copyOfAnswers[Math.floor(Math.random() * copyOfAnswers.length)];
 
     // render a button with the random answer as text
     renderAnswers($('.row'), i, randomizedAnswer);
@@ -83,45 +90,43 @@ const loadGame = (problem = dict[Math.floor(Math.random() * dict.length)]) => {
   }
 };
 
+/**
+ * function to decrement the questionTime, and calls the nextQuestionCountdown
+ * when the questionTime reaches 0, function also handles incrementing noAnswers counter
+ */
 const timeForCurrentQuestion = () => {
   questionTime--; // decrement time
   $('#time').text('Time Remaining: ' + questionTime + ' Seconds'); // render the countdown
+
+  // when the questionTime reaches 0
   if (questionTime === 0) {
     noAnswers++;
     nextQuestionCountdown();
   }
 };
 
+/**
+ * function to decrement the breakTime, and loads the next question when
+ * breaktime reaches 0.
+ */
 const timeNextQuestion = () => {
-  console.log('Count down before next question starts:', breakTime);
-  breakTime--;
+  breakTime--; // decrement time
+
+  // when the breakTime reaches 0
   if (breakTime === 0) {
-    clearInterval(breakInterval); // clear time
+    clearInterval(breakInterval); // stop the countdown
     breakTime = MAX_BREAK_TIME; // reset the time
-    loadGame();
+    loadQstn();
   }
 };
 
+/**
+ * function to clear the questionTime countdown, reset it, and start the breakTime countdown
+ */
 const nextQuestionCountdown = () => {
-  clearInterval(questionInterval); // clear time
-  questionTime = MAX_QUESTION_TIME; // start time
-  breakInterval = setInterval(timeNextQuestion, 1000); // start next timer
-};
-
-const init = () => {
-  // initialize variables
-  correctAnswers = 0;
-  incorrectAnswers = 0;
-  noAnswers = 0;
-  totalQuestions = 0;
-  questionTime = MAX_QUESTION_TIME;
-  breakTime = MAX_BREAK_TIME;
-
-  $('#startWrap').hide(); // hide start screen
-
-  initDictionary(); // fill the dictionary with triva questions
-
-  loadGame(); // load the first question
+  clearInterval(questionInterval); // stop the countdown
+  questionTime = MAX_QUESTION_TIME; // reset the time
+  breakInterval = setInterval(timeNextQuestion, 1000); // start the countdown for the next question
 };
 
 const initDictionary = () => {
@@ -145,6 +150,22 @@ const initDictionary = () => {
       ]
     }
   );
+};
+
+const init = () => {
+  // initialize variables
+  correctAnswers = 0;
+  incorrectAnswers = 0;
+  noAnswers = 0;
+  totalQuestions = 0;
+  questionTime = MAX_QUESTION_TIME;
+  breakTime = MAX_BREAK_TIME;
+
+  $('#startWrap').hide(); // hide start screen
+
+  initDictionary(); // fill the dictionary with triva questions
+
+  loadQstn(); // load the first question
 };
 
 window.onload = () => {
