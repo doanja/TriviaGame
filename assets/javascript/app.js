@@ -1,7 +1,7 @@
 const dict = [];
 let copyOfDict = [];
 let correctAnswers, incorrectAnswers, unanswered, totalQstns, qstnCounter; // counters for player score
-let questionTime, questionInterval, breakTime, breakInterval;
+let questionTime, questionInterval, breakTime, breakInterval; // time variables
 const MAX_QUESTION_TIME = 5; // max time for the questionTime
 const MAX_BREAK_TIME = 5; // max time for the breakTime
 
@@ -41,7 +41,12 @@ const renderAnswers = (parentElement, num, answr) => {
   parentElement.append(col);
 };
 
+/**
+ * function to create and render the end game stats
+ * @param {object} parentElement the element to append the question to
+ */
 const renderEndGameStats = parentElement => {
+  // create elements
   const correctTxt = $('<h4>').text('Correct Answers: ' + correctAnswers);
   const incorrectTxt = $('<h4>').text('Incorrect Answers: ' + incorrectAnswers);
   const unansweredTxt = $('<h4>').text('Unaswered: ' + unanswered);
@@ -51,6 +56,7 @@ const renderEndGameStats = parentElement => {
     class: 'btn btn-outline-light'
   }).text('Start Over?');
 
+  // append the elements to the html
   parentElement.append(correctTxt, incorrectTxt, unansweredTxt, hr, button);
 };
 
@@ -73,6 +79,7 @@ const loadQstn = (problem = dict[Math.floor(Math.random() * dict.length)]) => {
     // render end game stats
     renderEndGameStats($('#answersWrap'));
 
+    // when the player clicks the start over button, restart the game
     $('#start-over-btn').click(initGlobals);
   } else {
     // timer countdown for each question
@@ -180,6 +187,9 @@ const answerClicked = (isCorrect, correctAnswer) => {
   }
 };
 
+/**
+ * function to add questions to the array and create a immutable duplciate of dict
+ */
 const loadDictionary = () => {
   dict.push(
     {
@@ -213,10 +223,17 @@ const loadDictionary = () => {
   totalQstns = dict.length;
 };
 
+/**
+ * function to hide the game screen, show the start screen,
+ * and initialize global variables
+ */
 const initGlobals = () => {
+  // clear the game
   $('#answersWrap').empty();
   $('#answersWrap').hide();
-  $('#startWrap').show(); // hide start screen
+
+  // show the start screen
+  $('#startWrap').show();
 
   // initialize variables / reset variables
   correctAnswers = 0;
@@ -225,13 +242,16 @@ const initGlobals = () => {
   qstnCounter = -1;
   questionTime = MAX_QUESTION_TIME;
   breakTime = MAX_BREAK_TIME;
-  // clearInterval(questionInterval);
-  // clearInterval(breakInterval);
 };
 
+/**
+ * function to hide the start screen and show the game screen,
+ * loads dictionary and loads a question
+ */
 const loadGame = () => {
-  $('#startWrap').hide(); // hide start screen
-  $('#answersWrap').show();
+  $('#startWrap').hide(); // hide the start screen
+
+  $('#answersWrap').show(); // show the game screen
 
   loadDictionary(); // fill the dictionary with triva questions
 
