@@ -1,7 +1,7 @@
-const dict = [];
+let dict = [];
 let copyOfDict = [];
-let correctAnswers, incorrectAnswers, unanswered, totalQstns, qstnCounter; // counters for player score
-let questionTime, questionInterval, breakTime, breakInterval; // time variables
+let correctAnswers, incorrectAnswers, unanswered, qstnCounter; // counters for player score
+let questionTime, questionInterval, breakTime, breakTimeout; // time variables
 const MAX_QUESTION_TIME = 5; // max time for the questionTime
 const MAX_BREAK_TIME = 5; // max time for the breakTime
 
@@ -60,69 +60,68 @@ const renderEndGameStats = parentElement => {
   parentElement.append(correctTxt, incorrectTxt, unansweredTxt, hr, button);
 };
 
+const endScreen = () => {
+  // clear the #answerWrap
+  $('#answersWrap').empty();
+
+  // clear the question timer
+  clearInterval(questionInterval);
+
+  // render end game stats
+  renderEndGameStats($('#answersWrap'));
+
+  // when the player clicks the start over button, restart the game
+  $('#start-over-btn').click(initGlobals);
+};
+
 /**
  * function to randomly select a question: answer set, render them and check for game logic
  * @param {object} problem a random object containing an answer with an array of answers
  */
 const loadQstn = (problem = dict[Math.floor(Math.random() * dict.length)]) => {
-  // increment the counter
-  qstnCounter++;
+  // timer countdown for each question
+  questionInterval = setInterval(timeForCurrentQuestion, 1000);
 
-  // check if all questions have been asked
-  if (qstnCounter === totalQstns) {
-    // clear the #answerWrap
-    $('#answersWrap').empty();
+  // clear previous question (if any)
+  $('#answersWrap').empty();
 
-    // clear the question timer
-    clearInterval(questionInterval);
+  // renders the question
+  renderQuestion($('#answersWrap'), problem.question);
 
-    // render end game stats
-    renderEndGameStats($('#answersWrap'));
+  // reference to the correct answer stored in index 0 of problem.answers
+  const theCorrectAnswer = problem.answers[0];
 
-    // when the player clicks the start over button, restart the game
-    $('#start-over-btn').click(initGlobals);
-  } else {
-    // timer countdown for each question
-    questionInterval = setInterval(timeForCurrentQuestion, 1000);
+  // create a mutable copy of problem.answers
+  const copyOfAnswers = [...problem.answers];
 
-    // clear previous question (if any)
-    $('#answersWrap').empty();
+  // render the answers
+  for (let i = 0; i < 4; i++) {
+    // grab a random answer
+    const randomAnswer =
+      copyOfAnswers[Math.floor(Math.random() * copyOfAnswers.length)];
 
-    // renders the question
-    renderQuestion($('#answersWrap'), problem.question);
+    // render a button with the random answer as text
+    renderAnswers($('.row'), i, randomAnswer);
 
-    // reference to the correct answer stored in index 0 of problem.answers
-    const theCorrectAnswer = problem.answers[0];
+    // remove the answer from the array
+    copyOfAnswers.splice(copyOfAnswers.indexOf(randomAnswer), 1); // remove the random answer
 
-    // create a mutable copy of problem.answers
-    const copyOfAnswers = [...problem.answers];
+    // attach a click listener to the button and check the answer
+    $('#answers-' + i).click(() => {
+      // if the answer is correct
+      if (randomAnswer === theCorrectAnswer) {
+        answerClicked(0, theCorrectAnswer);
+      }
 
-    // render the answers
-    for (let i = 0; i < 4; i++) {
-      // grab a random answer
-      const randomAnswer =
-        copyOfAnswers[Math.floor(Math.random() * copyOfAnswers.length)];
-
-      // render a button with the random answer as text
-      renderAnswers($('.row'), i, randomAnswer);
-
-      // remove the answer from the array
-      copyOfAnswers.splice(copyOfAnswers.indexOf(randomAnswer), 1); // remove the random answer
-
-      // attach a click listener to the button and check the answer
-      $('#answers-' + i).click(() => {
-        // if the answer is correct
-        if (randomAnswer === theCorrectAnswer) {
-          answerClicked(0, theCorrectAnswer);
-        }
-
-        // if the answer is incorrect
-        else if (randomAnswer !== theCorrectAnswer) {
-          answerClicked(1, theCorrectAnswer);
-        }
-      });
-    }
+      // if the answer is incorrect
+      else if (randomAnswer !== theCorrectAnswer) {
+        answerClicked(1, theCorrectAnswer);
+      }
+    });
   }
+
+  // remove
+  dict.splice(dict.indexOf(problem), 1);
 };
 
 /**
@@ -150,9 +149,13 @@ const nextQuestionCountdown = () => {
   $('.row').empty();
   clearInterval(questionInterval); // stop the countdown
   questionTime = MAX_QUESTION_TIME; // reset the time
-  breakInterval = setTimeout(() => {
-    loadQstn(); // start the countdown for the next question
-  }, 5000);
+  if (dict.length === 0) {
+    endScreen();
+  } else {
+    breakTimeout = setTimeout(() => {
+      loadQstn(); // start the countdown for the next question
+    }, 5000);
+  }
 };
 
 /**
@@ -199,28 +202,26 @@ const loadDictionary = () => {
     {
       question: 'Great Whites and Hammerheads are what type of animals?',
       answers: ['Sharks', 'Dolphins', 'Whales', 'Fish']
+    },
+    {
+      question:
+        'Which famous nurse was known as “The Lady Of The Lamp” during the crimean war?',
+      answers: [
+        'Florence Nightingale',
+        'Marie Curie',
+        'Jane Austen',
+        'Eleanor of Aquitaine'
+      ]
+    },
+    {
+      question: 'If you boil water you get?',
+      answers: ['Steam', 'Water', 'Air', 'Oxygen']
+    },
+    {
+      question: 'Where did the Olympic Games originate?',
+      answers: ['Greece', 'Brazil', 'China', 'Canada']
     }
-    // ,
-    // {
-    //   question:
-    //     'Which famous nurse was known as “The Lady Of The Lamp” during the crimean war?',
-    //   answers: [
-    //     'Florence Nightingale',
-    //     'Marie Curie',
-    //     'Jane Austen',
-    //     'Eleanor of Aquitaine'
-    //   ]
-    // },
-    // {
-    //   question: 'If you boil water you get?',
-    //   answers: ['Steam', 'Water', 'Air', 'Oxygen']
-    // },
-    // {
-    //   question: 'Where did the Olympic Games originate?',
-    //   answers: ['Greece', 'Brazil', 'China', 'Canada']
-    // }
   );
-  totalQstns = dict.length;
 };
 
 /**
@@ -239,9 +240,10 @@ const initGlobals = () => {
   correctAnswers = 0;
   incorrectAnswers = 0;
   unanswered = 0;
-  qstnCounter = -1;
   questionTime = MAX_QUESTION_TIME;
   breakTime = MAX_BREAK_TIME;
+
+  loadDictionary(); // fill the dictionary with triva questions
 };
 
 /**
@@ -252,8 +254,6 @@ const loadGame = () => {
   $('#startWrap').hide(); // hide the start screen
 
   $('#answersWrap').show(); // show the game screen
-
-  loadDictionary(); // fill the dictionary with triva questions
 
   loadQstn(); // load the first question
 };
