@@ -32,7 +32,7 @@ const renderAnswers = (parentElement, num, answr) => {
   //create the elements
   const col = $('<col>', { class: 'col-12 mt-3' });
   const answers = $('<button>', {
-    class: 'btn btn-dark',
+    class: 'btn btn-outline-light',
     id: 'answers-' + num
   }).text(answr);
 
@@ -48,7 +48,7 @@ const renderEndGameStats = parentElement => {
   const hr = $('<hr>');
   const button = $('<button>', {
     id: 'start-over-btn',
-    class: 'btn btn-success'
+    class: 'btn btn-outline-light'
   }).text('Start Over?');
 
   parentElement.append(correctTxt, incorrectTxt, unansweredTxt, hr, button);
@@ -123,41 +123,29 @@ const loadQstn = (problem = dict[Math.floor(Math.random() * dict.length)]) => {
  * when the questionTime reaches 0, function also handles incrementing noAnswers counter
  */
 const timeForCurrentQuestion = () => {
-  console.log('questionTime :', questionTime);
   questionTime--; // decrement time
   $('#time').text('Time Remaining: ' + questionTime + ' Seconds'); // render the countdown
 
   // when the questionTime reaches 0
   if (questionTime === 0) {
     unanswered++;
-    // console.log('noAnswers incremented:', noAnswers);
+    $('#msg')
+      .text('Time has ran out...')
+      .attr('class', 'text-danger');
     nextQuestionCountdown();
   }
 };
-
-// /**
-//  * function to decrement the breakTime, and loads the next question when
-//  * breaktime reaches 0.
-//  */
-// const timeNextQuestion = () => {
-//   console.log('breakTime :', breakTime);
-//   breakTime--; // decrement time
-
-//   // when the breakTime reaches 0
-//   if (breakTime === 0) {
-//     clearTimeout(breakInterval); // stop the countdown
-//     breakTime = MAX_BREAK_TIME; // reset the time
-//     loadQstn();
-//   }
-// };
 
 /**
  * function to clear the questionTime countdown, reset it, and start the breakTime countdown
  */
 const nextQuestionCountdown = () => {
+  $('.row').empty();
   clearInterval(questionInterval); // stop the countdown
   questionTime = MAX_QUESTION_TIME; // reset the time
-  breakInterval = setTimeout(loadQstn, 5000); // start the countdown for the next question
+  breakInterval = setTimeout(() => {
+    loadQstn(); // start the countdown for the next question
+  }, 5000);
 };
 
 /**
@@ -223,11 +211,9 @@ const loadDictionary = () => {
     // }
   );
   totalQstns = dict.length;
-  // console.log('totalQuestions :', totalQuestions);
 };
 
 const initGlobals = () => {
-  console.log('initGlobals called');
   $('#answersWrap').empty();
   $('#answersWrap').hide();
   $('#startWrap').show(); // hide start screen
