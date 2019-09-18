@@ -1,7 +1,7 @@
 const dict = [];
 let correctAnswers, incorrectAnswers, noAnswers;
 let totalQuestions;
-let time, intervalId, breakTime;
+let questionTime, questionInterval, breakTime, breakInterval;
 
 /*
  *  @param parentElement, the element to append elements to
@@ -29,7 +29,7 @@ const renderAnswers = (parentElement, num, answersArr) => {
 };
 
 const loadGame = (problem = dict[Math.floor(Math.random() * dict.length)]) => {
-  intervalId = setInterval(countDown, 1000);
+  questionInterval = setInterval(timeForCurrentQuestion, 1000); // calls timeForCurentQuestion every 1 sec
   console.log('loadGame() is called');
 
   $('#answersWrap').empty();
@@ -71,15 +71,31 @@ const loadGame = (problem = dict[Math.floor(Math.random() * dict.length)]) => {
   }
 };
 
-const countDown = () => {
-  time--;
-  $('#time').text('Time Remaining: ' + time + ' Seconds');
-  if (time === 0) {
-    loadGame();
+const timeForCurrentQuestion = () => {
+  console.log('questionTime :', questionTime);
+  questionTime--; // decrement time
+  $('#time').text('Time Remaining: ' + questionTime + ' Seconds'); // update tet
+  if (questionTime === 0) {
+    console.log('questionTime hit 0');
+    noAnswers++;
+    clearInterval(questionInterval); // clear time
+    // questionTime = 10; // start time
+    console.log('questionTime at 0:', questionTime);
+    // loadGame();
+    // breakInterval = setInterval(timeNextQuestion, 1000);
   }
 };
 
-const timeBeforeNewQuestion = () => {};
+// const timeNextQuestion = () => {
+//   console.log('timeNextQuestion Called | time:', breakTime);
+//   breakTime--;
+//   if (breakTime === 0) {
+//     console.log('breakTime hit 0');
+//     clearInterval(breakTime);
+//     breakTime = 5;
+//     loadGame();
+//   }
+// };
 
 const init = () => {
   // initialize variables
@@ -87,7 +103,7 @@ const init = () => {
   incorrectAnswers = 0;
   noAnswers = 0;
   totalQuestions = 0;
-  time = 30;
+  questionTime = 5;
   breakTime = 5;
 
   $('#startWrap').hide(); // hide start screen
