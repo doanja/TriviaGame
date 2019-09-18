@@ -1,9 +1,11 @@
 const dict = [];
+let chosenAnswer = null;
+let correctAnswers, incorrectAnswers, noAnswers;
 
 /*
  *  @param parentElement, the element to append elements to
  */
-const renderGame = (parentElement, quest) => {
+const renderQuestion = (parentElement, quest) => {
   console.log('renderGame called');
   const time = $('<h3>', { id: 'time' }).text('Time Remaining: XX Seconds');
   const question = $('<h5>', { id: 'question' }).text(quest);
@@ -26,24 +28,49 @@ const renderAnswers = (parentElement, num, answersArr) => {
   parentElement.append(col);
 };
 
-const loadQuestion = (question, answers) => {
-  renderGame($('#answersWrap'), question);
+const loadGame = problem => {
+  renderQuestion($('#answersWrap'), problem.question);
 
-  // index 0 in dict[i].answers is always the answer, grab what the user clicked on, compare it to this
+  // create a mutable copy of problem.answers
+  const copyOfAnswers = [...problem.answers];
+
   for (let i = 0; i < 4; i++) {
-    const randomAnswer = answers[Math.floor(Math.random() * answers.length)]; // grab a random answer
-    renderAnswers($('.row'), i, randomAnswer); // render a button with the random answer as text
-    answers.splice(answers.indexOf(randomAnswer), 1); // remove the random answer
+    const randomizedAnswer =
+      copyOfAnswers[Math.floor(Math.random() * copyOfAnswers.length)]; // grab a random answer
+    renderAnswers($('.row'), i, randomizedAnswer); // render a button with the random answer as text
+
+    // attach a click listener to the button and check the answer
+    $('#answers-' + i).click(() => {
+      // if the answer is correct
+      if (randomizedAnswer === problem.answers[0]) {
+        correctAnswers++;
+        console.log('true');
+      }
+      // if the answer is incorrect
+      else if (randomizedAnswer !== problem.answers[0]) {
+        incorrectAnswers++;
+        console.log('nope');
+      } else {
+        // timer ran out
+        noAnswers++;
+      }
+    });
+    // remove the answer from the array
+    copyOfAnswers.splice(copyOfAnswers.indexOf(randomizedAnswer), 1); // remove the random answer
   }
 };
 
-const startGame = () => {
-  $('#startWrap').hide(); // hide start stuff
-  initDictionary(); // fill the dictionary with triva questions
-  loadQuestion(dict[0].question, dict[0].answers);
+const init = () => {
+  // initialize variables
+  correctAnswers = 0;
+  incorrectAnswers = 0;
+  noAnswers = 0;
 
-  //   console.log('dict :', dict);
-  console.log('dict[0].answers :', dict[0].answers);
+  $('#startWrap').hide(); // hide start screen
+
+  initDictionary(); // fill the dictionary with triva questions
+
+  loadGame(dict[0]);
 };
 
 const initDictionary = () => {
@@ -70,5 +97,5 @@ const initDictionary = () => {
 };
 
 window.onload = () => {
-  $('#play-button').click(startGame);
+  $('#play-button').click(init);
 };
