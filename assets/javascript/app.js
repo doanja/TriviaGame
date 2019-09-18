@@ -1,5 +1,6 @@
 const dict = [];
-let correctAnswers, incorrectAnswers, noAnswers, totalQuestions; // counters for player score
+let copyOfDict = [];
+let correctAnswers, incorrectAnswers, unanswered, totalQstns, qstnCounter; // counters for player score
 let questionTime, questionInterval, breakTime, breakInterval;
 const MAX_QUESTION_TIME = 5; // max time for the questionTime
 const MAX_BREAK_TIME = 5; // max time for the breakTime
@@ -31,7 +32,7 @@ const renderAnswers = (parentElement, num, answr) => {
   //create the elements
   const col = $('<col>', { class: 'col-12 mt-3' });
   const answers = $('<button>', {
-    class: 'btn btn-primary',
+    class: 'btn btn-dark',
     id: 'answers-' + num
   }).text(answr);
 
@@ -40,50 +41,80 @@ const renderAnswers = (parentElement, num, answr) => {
   parentElement.append(col);
 };
 
+const renderEndGameStats = parentElement => {
+  const correctTxt = $('<h4>').text('Correct Answers: ' + correctAnswers);
+  const incorrectTxt = $('<h4>').text('Incorrect Answers: ' + incorrectAnswers);
+  const unansweredTxt = $('<h4>').text('Unaswered: ' + unanswered);
+  const hr = $('<hr>');
+  const button = $('<button>', {
+    id: 'start-over-btn',
+    class: 'btn btn-success'
+  }).text('Start Over?');
+
+  parentElement.append(correctTxt, incorrectTxt, unansweredTxt, hr, button);
+};
+
 /**
  * function to randomly select a question: answer set, render them and check for game logic
  * @param {object} problem a random object containing an answer with an array of answers
  */
 const loadQstn = (problem = dict[Math.floor(Math.random() * dict.length)]) => {
-  // timer countdown for each question
-  questionInterval = setInterval(timeForCurrentQuestion, 1000);
+  // increment the counter
+  qstnCounter++;
 
-  // clear previous question (if any)
-  $('#answersWrap').empty();
+  // check if all questions have been asked
+  if (qstnCounter === totalQstns) {
+    // clear the #answerWrap
+    $('#answersWrap').empty();
 
-  // renders the question
-  renderQuestion($('#answersWrap'), problem.question);
+    // clear the question timer
+    clearInterval(questionInterval);
 
-  // reference to the correct answer stored in index 0 of problem.answers
-  const theCorrectAnswer = problem.answers[0];
+    // render end game stats
+    renderEndGameStats($('#answersWrap'));
 
-  // create a mutable copy of problem.answers
-  const copyOfAnswers = [...problem.answers];
+    $('#start-over-btn').click(initGlobals);
+  } else {
+    // timer countdown for each question
+    questionInterval = setInterval(timeForCurrentQuestion, 1000);
 
-  // render the answers
-  for (let i = 0; i < 4; i++) {
-    // grab a random answer
-    const randomAnswer =
-      copyOfAnswers[Math.floor(Math.random() * copyOfAnswers.length)];
+    // clear previous question (if any)
+    $('#answersWrap').empty();
 
-    // render a button with the random answer as text
-    renderAnswers($('.row'), i, randomAnswer);
+    // renders the question
+    renderQuestion($('#answersWrap'), problem.question);
 
-    // remove the answer from the array
-    copyOfAnswers.splice(copyOfAnswers.indexOf(randomAnswer), 1); // remove the random answer
+    // reference to the correct answer stored in index 0 of problem.answers
+    const theCorrectAnswer = problem.answers[0];
 
-    // attach a click listener to the button and check the answer
-    $('#answers-' + i).click(() => {
-      // if the answer is correct
-      if (randomAnswer === theCorrectAnswer) {
-        answerClicked(0, theCorrectAnswer);
-      }
+    // create a mutable copy of problem.answers
+    const copyOfAnswers = [...problem.answers];
 
-      // if the answer is incorrect
-      else if (randomAnswer !== theCorrectAnswer) {
-        answerClicked(1, theCorrectAnswer);
-      }
-    });
+    // render the answers
+    for (let i = 0; i < 4; i++) {
+      // grab a random answer
+      const randomAnswer =
+        copyOfAnswers[Math.floor(Math.random() * copyOfAnswers.length)];
+
+      // render a button with the random answer as text
+      renderAnswers($('.row'), i, randomAnswer);
+
+      // remove the answer from the array
+      copyOfAnswers.splice(copyOfAnswers.indexOf(randomAnswer), 1); // remove the random answer
+
+      // attach a click listener to the button and check the answer
+      $('#answers-' + i).click(() => {
+        // if the answer is correct
+        if (randomAnswer === theCorrectAnswer) {
+          answerClicked(0, theCorrectAnswer);
+        }
+
+        // if the answer is incorrect
+        else if (randomAnswer !== theCorrectAnswer) {
+          answerClicked(1, theCorrectAnswer);
+        }
+      });
+    }
   }
 };
 
@@ -92,32 +123,33 @@ const loadQstn = (problem = dict[Math.floor(Math.random() * dict.length)]) => {
  * when the questionTime reaches 0, function also handles incrementing noAnswers counter
  */
 const timeForCurrentQuestion = () => {
+  console.log('questionTime :', questionTime);
   questionTime--; // decrement time
   $('#time').text('Time Remaining: ' + questionTime + ' Seconds'); // render the countdown
 
   // when the questionTime reaches 0
   if (questionTime === 0) {
-    noAnswers++;
-    console.log('noAnswers incremented:', noAnswers);
+    unanswered++;
+    // console.log('noAnswers incremented:', noAnswers);
     nextQuestionCountdown();
   }
 };
 
-/**
- * function to decrement the breakTime, and loads the next question when
- * breaktime reaches 0.
- */
-const timeNextQuestion = () => {
-  console.log('breakTime :', breakTime);
-  breakTime--; // decrement time
+// /**
+//  * function to decrement the breakTime, and loads the next question when
+//  * breaktime reaches 0.
+//  */
+// const timeNextQuestion = () => {
+//   console.log('breakTime :', breakTime);
+//   breakTime--; // decrement time
 
-  // when the breakTime reaches 0
-  if (breakTime === 0) {
-    clearInterval(breakInterval); // stop the countdown
-    breakTime = MAX_BREAK_TIME; // reset the time
-    loadQstn();
-  }
-};
+//   // when the breakTime reaches 0
+//   if (breakTime === 0) {
+//     clearTimeout(breakInterval); // stop the countdown
+//     breakTime = MAX_BREAK_TIME; // reset the time
+//     loadQstn();
+//   }
+// };
 
 /**
  * function to clear the questionTime countdown, reset it, and start the breakTime countdown
@@ -125,7 +157,7 @@ const timeNextQuestion = () => {
 const nextQuestionCountdown = () => {
   clearInterval(questionInterval); // stop the countdown
   questionTime = MAX_QUESTION_TIME; // reset the time
-  breakInterval = setInterval(timeNextQuestion, 1000); // start the countdown for the next question
+  breakInterval = setTimeout(loadQstn, 5000); // start the countdown for the next question
 };
 
 /**
@@ -160,7 +192,7 @@ const answerClicked = (isCorrect, correctAnswer) => {
   }
 };
 
-const initDictionary = () => {
+const loadDictionary = () => {
   dict.push(
     {
       question: 'What is the diameter of Earth?',
@@ -169,44 +201,58 @@ const initDictionary = () => {
     {
       question: 'Great Whites and Hammerheads are what type of animals?',
       answers: ['Sharks', 'Dolphins', 'Whales', 'Fish']
-    },
-    {
-      question:
-        'Which famous nurse was known as “The Lady Of The Lamp” during the crimean war?',
-      answers: [
-        'Florence Nightingale',
-        'Marie Curie',
-        'Jane Austen',
-        'Eleanor of Aquitaine'
-      ]
-    },
-    {
-      question: 'If you boil water you get?',
-      answers: ['Steam', 'Water', 'Air', 'Oxygen']
-    },
-    {
-      question: 'Where did the Olympic Games originate?',
-      answers: ['Greece', 'Brazil', 'China', 'Canada']
     }
+    // ,
+    // {
+    //   question:
+    //     'Which famous nurse was known as “The Lady Of The Lamp” during the crimean war?',
+    //   answers: [
+    //     'Florence Nightingale',
+    //     'Marie Curie',
+    //     'Jane Austen',
+    //     'Eleanor of Aquitaine'
+    //   ]
+    // },
+    // {
+    //   question: 'If you boil water you get?',
+    //   answers: ['Steam', 'Water', 'Air', 'Oxygen']
+    // },
+    // {
+    //   question: 'Where did the Olympic Games originate?',
+    //   answers: ['Greece', 'Brazil', 'China', 'Canada']
+    // }
   );
+  totalQstns = dict.length;
+  // console.log('totalQuestions :', totalQuestions);
 };
 
-const init = () => {
-  // initialize variables
+const initGlobals = () => {
+  console.log('initGlobals called');
+  $('#answersWrap').empty();
+  $('#answersWrap').hide();
+  $('#startWrap').show(); // hide start screen
+
+  // initialize variables / reset variables
   correctAnswers = 0;
   incorrectAnswers = 0;
-  noAnswers = 0;
-  totalQuestions = 0;
+  unanswered = 0;
+  qstnCounter = -1;
   questionTime = MAX_QUESTION_TIME;
   breakTime = MAX_BREAK_TIME;
+  // clearInterval(questionInterval);
+  // clearInterval(breakInterval);
+};
 
+const loadGame = () => {
   $('#startWrap').hide(); // hide start screen
+  $('#answersWrap').show();
 
-  initDictionary(); // fill the dictionary with triva questions
+  loadDictionary(); // fill the dictionary with triva questions
 
   loadQstn(); // load the first question
 };
 
 window.onload = () => {
-  $('#play-button').click(init);
+  initGlobals();
+  $('#play-button').click(loadGame);
 };
