@@ -1,31 +1,40 @@
 const dict = [];
-let correctAnswers, incorrectAnswers, noAnswers;
-let totalQuestions;
+let correctAnswers, incorrectAnswers, noAnswers, totalQuestions; // counters for player score
 let questionTime, questionInterval, breakTime, breakInterval;
-const MAX_QUESTION_TIME = 5;
-const MAX_BREAK_TIME = 5;
+const MAX_QUESTION_TIME = 5; // max time for the questionTime
+const MAX_BREAK_TIME = 5; // max time for the breakTime
 
-/*
- *  @param parentElement, the element to append elements to
+/**
+ * function to create and render the question
+ * @param {object} parentElement the element to append the question to
+ * @param {object} qstn the question to append to the html
  */
-const renderQuestion = (parentElement, quest) => {
+const renderQuestion = (parentElement, qstn) => {
+  // create the elements
   const time = $('<h3>', { id: 'time' }).text('Time Remaining: 30 Seconds');
-  const question = $('<h5>', { id: 'question' }).text(quest);
+  const question = $('<h5>', { id: 'question' }).text(qstn);
+  const msg = $('<div>', { id: 'msg' });
   const row = $('<div>', { class: 'row' });
 
-  parentElement.append(time);
-  parentElement.append(question);
-  parentElement.append(row);
+  // append the elements to the html
+  parentElement.append(time, question, msg, row);
 };
 
-// call this function X amount of times
-const renderAnswers = (parentElement, num, answersArr) => {
+/**
+ * function to create and render the answers
+ * @param {object} parentElement the element to append the question to
+ * @param {number} num the identifier assigned to the element
+ * @param {string} answr the answer for a question
+ */
+const renderAnswers = (parentElement, num, answr) => {
+  //create the elements
   const col = $('<col>', { class: 'col-12 mt-3' });
   const answers = $('<button>', {
     class: 'btn btn-primary',
     id: 'answers-' + num
-  }).text(answersArr);
+  }).text(answr);
 
+  // append the elements to the html
   col.append(answers);
   parentElement.append(col);
 };
@@ -60,6 +69,7 @@ const loadGame = (problem = dict[Math.floor(Math.random() * dict.length)]) => {
         console.log('true');
         nextQuestionCountdown();
         // disable button clicks
+        // update the html to show the player got the question right
       }
       // if the answer is incorrect
       else if (randomizedAnswer !== problem.answers[0]) {
@@ -67,6 +77,7 @@ const loadGame = (problem = dict[Math.floor(Math.random() * dict.length)]) => {
         console.log('nope');
         nextQuestionCountdown();
         // disable button clicks
+        // update html to show player got the question wrong and display the correct answer
       }
     });
   }
