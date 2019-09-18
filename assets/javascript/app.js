@@ -60,20 +60,6 @@ const renderEndGameStats = parentElement => {
   parentElement.append(correctTxt, incorrectTxt, unansweredTxt, hr, button);
 };
 
-const endScreen = () => {
-  // clear the #answerWrap
-  $('#answersWrap').empty();
-
-  // clear the question timer
-  clearInterval(questionInterval);
-
-  // render end game stats
-  renderEndGameStats($('#answersWrap'));
-
-  // when the player clicks the start over button, restart the game
-  $('#start-over-btn').click(initGlobals);
-};
-
 /**
  * function to randomly select a question: answer set, render them and check for game logic
  * @param {object} problem a random object containing an answer with an array of answers
@@ -159,7 +145,7 @@ const nextQuestionCountdown = () => {
 };
 
 /**
- *
+ * function to handle what happens when the player clicks an answer
  * @param {integer} isCorrect integer used to determine if the answer is correct (0), otherwise 1
  * @param {string} correctAnswer the correct answer
  */
@@ -170,6 +156,7 @@ const answerClicked = (isCorrect, correctAnswer) => {
   // disable button clicks
   $('.row').empty();
 
+  // if the answer is correct
   if (isCorrect === 0) {
     correctAnswers++;
 
@@ -177,7 +164,10 @@ const answerClicked = (isCorrect, correctAnswer) => {
     $('#msg')
       .text('Correct')
       .attr('class', 'text-success');
-  } else {
+  }
+
+  // if the answer was incorrect
+  else {
     incorrectAnswers++;
 
     // update html to show player got the question wrong and display the correct answer
@@ -188,6 +178,24 @@ const answerClicked = (isCorrect, correctAnswer) => {
       .attr('class', 'text-danger')
       .text('The correct answer was: ' + correctAnswer);
   }
+};
+
+/**
+ * function that handles hiding the game, stopping the question time, and
+ * rendering the end game stats screen
+ */
+const endScreen = () => {
+  // clear the #answerWrap
+  $('#answersWrap').empty();
+
+  // clear the question timer
+  clearInterval(questionInterval);
+
+  // render end game stats
+  renderEndGameStats($('#answersWrap'));
+
+  // when the player clicks the start over button, restart the game
+  $('#start-over-btn').click(initGlobals);
 };
 
 /**
