@@ -3,6 +3,14 @@ body {
 }
 
 .container {
-  border: 1px solid red;
+  /* border: 1px solid red; */
   height: 90vh;
+}
+
+.btn {
+  width: 30%;
+}
+
+h3 {
+  text-decoration: underline;
 }

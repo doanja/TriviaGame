@@ -11,13 +11,14 @@ const MAX_BREAK_TIME = 5; // max time for the breakTime
  */
 const renderQuestion = (parentElement, qstn) => {
   // create the elements
-  const time = $('<h3>', { id: 'time' }).text('Time Remaining: 30 Seconds');
-  const question = $('<h5>', { id: 'question' }).text(qstn);
-  const msg = $('<div>', { id: 'msg' });
+  const time = $('<h5>', { id: 'time' }).text('Time Remaining: 30 Seconds');
+  const question = $('<h3>', { id: 'question' }).text(qstn);
+  const msg = $('<h4>', { id: 'msg' });
+  const subMsg = $('<h4>', { id: 'subMsg' });
   const row = $('<div>', { class: 'row' });
 
   // append the elements to the html
-  parentElement.append(time, question, msg, row);
+  parentElement.append(time, question, msg, subMsg, row);
 };
 
 /**
@@ -53,38 +54,34 @@ const loadQstn = (problem = dict[Math.floor(Math.random() * dict.length)]) => {
   // renders the question
   renderQuestion($('#answersWrap'), problem.question);
 
+  // reference to the correct answer stored in index 0 of problem.answers
+  const theCorrectAnswer = problem.answers[0];
+
   // create a mutable copy of problem.answers
   const copyOfAnswers = [...problem.answers];
 
   // render the answers
   for (let i = 0; i < 4; i++) {
     // grab a random answer
-    const randomizedAnswer =
+    const randomAnswer =
       copyOfAnswers[Math.floor(Math.random() * copyOfAnswers.length)];
 
     // render a button with the random answer as text
-    renderAnswers($('.row'), i, randomizedAnswer);
+    renderAnswers($('.row'), i, randomAnswer);
 
     // remove the answer from the array
-    copyOfAnswers.splice(copyOfAnswers.indexOf(randomizedAnswer), 1); // remove the random answer
+    copyOfAnswers.splice(copyOfAnswers.indexOf(randomAnswer), 1); // remove the random answer
 
     // attach a click listener to the button and check the answer
     $('#answers-' + i).click(() => {
       // if the answer is correct
-      if (randomizedAnswer === problem.answers[0]) {
-        correctAnswers++;
-        console.log('true');
-        nextQuestionCountdown();
-        // disable button clicks
-        // update the html to show the player got the question right
+      if (randomAnswer === theCorrectAnswer) {
+        answerClicked(0, theCorrectAnswer);
       }
+
       // if the answer is incorrect
-      else if (randomizedAnswer !== problem.answers[0]) {
-        incorrectAnswers++;
-        console.log('nope');
-        nextQuestionCountdown();
-        // disable button clicks
-        // update html to show player got the question wrong and display the correct answer
+      else if (randomAnswer !== theCorrectAnswer) {
+        answerClicked(1, theCorrectAnswer);
       }
     });
   }
@@ -101,6 +98,7 @@ const timeForCurrentQuestion = () => {
   // when the questionTime reaches 0
   if (questionTime === 0) {
     noAnswers++;
+    console.log('noAnswers incremented:', noAnswers);
     nextQuestionCountdown();
   }
 };
@@ -110,6 +108,7 @@ const timeForCurrentQuestion = () => {
  * breaktime reaches 0.
  */
 const timeNextQuestion = () => {
+  console.log('breakTime :', breakTime);
   breakTime--; // decrement time
 
   // when the breakTime reaches 0
@@ -129,6 +128,38 @@ const nextQuestionCountdown = () => {
   breakInterval = setInterval(timeNextQuestion, 1000); // start the countdown for the next question
 };
 
+/**
+ *
+ * @param {integer} isCorrect integer used to determine if the answer is correct (0), otherwise 1
+ * @param {string} correctAnswer the correct answer
+ */
+const answerClicked = (isCorrect, correctAnswer) => {
+  // start breakTime countdown
+  nextQuestionCountdown();
+
+  // disable button clicks
+  $('.row').empty();
+
+  if (isCorrect === 0) {
+    correctAnswers++;
+
+    // update the html to show the player got the question right
+    $('#msg')
+      .text('Correct')
+      .attr('class', 'text-success');
+  } else {
+    incorrectAnswers++;
+
+    // update html to show player got the question wrong and display the correct answer
+    $('#msg')
+      .text('Incorrect')
+      .attr('class', 'text-danger');
+    $('#subMsg')
+      .attr('class', 'text-danger')
+      .text('The correct answer was: ' + correctAnswer);
+  }
+};
+
 const initDictionary = () => {
   dict.push(
     {
@@ -137,17 +168,25 @@ const initDictionary = () => {
     },
     {
       question: 'Great Whites and Hammerheads are what type of animals?',
-      answers: ['Sharks', 'Dolphins', 'Mammals', 'Reptiles']
+      answers: ['Sharks', 'Dolphins', 'Whales', 'Fish']
     },
     {
       question:
         'Which famous nurse was known as “The Lady Of The Lamp” during the crimean war?',
       answers: [
         'Florence Nightingale',
-        'Abigail Williams',
-        'Napoleon Bonaparte',
-        'Yugi Moto'
+        'Marie Curie',
+        'Jane Austen',
+        'Eleanor of Aquitaine'
       ]
+    },
+    {
+      question: 'If you boil water you get?',
+      answers: ['Steam', 'Water', 'Air', 'Oxygen']
+    },
+    {
+      question: 'Where did the Olympic Games originate?',
+      answers: ['Greece', 'Brazil', 'China', 'Canada']
     }
   );
 };
