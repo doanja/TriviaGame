@@ -2,6 +2,8 @@ const dict = [];
 let correctAnswers, incorrectAnswers, noAnswers;
 let totalQuestions;
 let questionTime, questionInterval, breakTime, breakInterval;
+const MAX_QUESTION_TIME = 5;
+const MAX_BREAK_TIME = 5;
 
 /*
  *  @param parentElement, the element to append elements to
@@ -32,19 +34,20 @@ const loadGame = (problem = dict[Math.floor(Math.random() * dict.length)]) => {
   questionInterval = setInterval(timeForCurrentQuestion, 1000); // calls timeForCurentQuestion every 1 sec
   console.log('loadGame() is called');
 
-  $('#answersWrap').empty();
+  $('#answersWrap').empty(); // clear previous question (if any)
 
-  // [WIP] start timer here, if timer reaches 0, call load game
-
-  renderQuestion($('#answersWrap'), problem.question);
+  renderQuestion($('#answersWrap'), problem.question); // renders the question
 
   // create a mutable copy of problem.answers
   const copyOfAnswers = [...problem.answers];
 
+  // render the answers
   for (let i = 0; i < 4; i++) {
     const randomizedAnswer =
       copyOfAnswers[Math.floor(Math.random() * copyOfAnswers.length)]; // grab a random answer
-    renderAnswers($('.row'), i, randomizedAnswer); // render a button with the random answer as text
+
+    // render a button with the random answer as text
+    renderAnswers($('.row'), i, randomizedAnswer);
 
     // remove the answer from the array
     copyOfAnswers.splice(copyOfAnswers.indexOf(randomizedAnswer), 1); // remove the random answer
@@ -55,47 +58,44 @@ const loadGame = (problem = dict[Math.floor(Math.random() * dict.length)]) => {
       if (randomizedAnswer === problem.answers[0]) {
         correctAnswers++;
         console.log('true');
-        // count down 5 seconds then load game
+        nextQuestionCountdown();
+        // disable button clicks
       }
       // if the answer is incorrect
       else if (randomizedAnswer !== problem.answers[0]) {
         incorrectAnswers++;
         console.log('nope');
-        // count down 5 seconds then load game
-      } else {
-        // timer ran out
-        noAnswers++;
-        // count down 5 secounds then load game
+        nextQuestionCountdown();
+        // disable button clicks
       }
     });
   }
 };
 
 const timeForCurrentQuestion = () => {
-  console.log('questionTime :', questionTime);
   questionTime--; // decrement time
-  $('#time').text('Time Remaining: ' + questionTime + ' Seconds'); // update tet
+  $('#time').text('Time Remaining: ' + questionTime + ' Seconds'); // render the countdown
   if (questionTime === 0) {
-    console.log('questionTime hit 0');
     noAnswers++;
-    clearInterval(questionInterval); // clear time
-    // questionTime = 10; // start time
-    console.log('questionTime at 0:', questionTime);
-    // loadGame();
-    // breakInterval = setInterval(timeNextQuestion, 1000);
+    nextQuestionCountdown();
   }
 };
 
-// const timeNextQuestion = () => {
-//   console.log('timeNextQuestion Called | time:', breakTime);
-//   breakTime--;
-//   if (breakTime === 0) {
-//     console.log('breakTime hit 0');
-//     clearInterval(breakTime);
-//     breakTime = 5;
-//     loadGame();
-//   }
-// };
+const timeNextQuestion = () => {
+  console.log('Count down before next question starts:', breakTime);
+  breakTime--;
+  if (breakTime === 0) {
+    clearInterval(breakInterval); // clear time
+    breakTime = MAX_BREAK_TIME; // reset the time
+    loadGame();
+  }
+};
+
+const nextQuestionCountdown = () => {
+  clearInterval(questionInterval); // clear time
+  questionTime = MAX_QUESTION_TIME; // start time
+  breakInterval = setInterval(timeNextQuestion, 1000); // start next timer
+};
 
 const init = () => {
   // initialize variables
@@ -103,8 +103,8 @@ const init = () => {
   incorrectAnswers = 0;
   noAnswers = 0;
   totalQuestions = 0;
-  questionTime = 5;
-  breakTime = 5;
+  questionTime = MAX_QUESTION_TIME;
+  breakTime = MAX_BREAK_TIME;
 
   $('#startWrap').hide(); // hide start screen
 
