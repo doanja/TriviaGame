@@ -2,7 +2,7 @@ let dict = [];
 let copyOfDict = [];
 let correctAnswers, incorrectAnswers, unanswered, qstnCounter; // counters for player score
 let questionTime, questionInterval, breakTime, breakTimeout; // time variables
-const MAX_QUESTION_TIME = 5; // max time for the questionTime
+const MAX_QUESTION_TIME = 30; // max time for the questionTime
 const MAX_BREAK_TIME = 5; // max time for the breakTime
 
 /**
