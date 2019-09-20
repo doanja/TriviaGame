@@ -28,6 +28,4 @@ This is a trivia game using JavaScript for the logic and jQuery to manipulate HT
 
 # License
 
-[![Creative Commons License](https://i.creativecommons.org/l/by-sa/4.0/88x31.png)](https://creativecommons.org/licenses/by-sa/4.0/)
-
-This work is licensed under a [Creative Commons Attribution-ShareAlike 4.0 International License](https://creativecommons.org/licenses/by-sa/4.0/).
+This work is Unlicensed under a (http://unlicense.org).
