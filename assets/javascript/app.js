@@ -169,7 +169,7 @@ const answerClicked = (isCorrect, correctAnswer) => {
 	}
 
 	// if the answer was incorrect
-	else {
+	else if (isCorrect === 1) {
 		incorrectAnswers++;
 
 		// update html to show player got the question wrong and display the correct answer
