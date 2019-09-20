@@ -138,7 +138,7 @@ const nextQuestionCountdown = () => {
 	clearInterval(questionInterval); // stop the countdown
 	questionTime = MAX_QUESTION_TIME; // reset the time
 	if (qstnCounter === MAX_QUESTIONS_ASKED) {
-		endScreen();
+		breakTimeout = setTimeout(endScreen, 5000);
 	} else {
 		breakTimeout = setTimeout(() => {
 			loadQstn(); // start the countdown for the next question
