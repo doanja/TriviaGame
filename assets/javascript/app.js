@@ -209,7 +209,7 @@ const loadDictionary = (url) => {
 	// 		dict.push(obj);
 	// 	});
 	// });
-	dict = { ...data };
+	dict = [...data];
 };
 
 /**
