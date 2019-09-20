@@ -204,11 +204,12 @@ const endScreen = () => {
  * function to add questions to the array and create a immutable duplciate of dict
  */
 const loadDictionary = (url) => {
-	$.getJSON(url, (data) => {
-		data.forEach((obj) => {
-			dict.push(obj);
-		});
-	});
+	// $.getJSON(url, (data) => {
+	// 	data.forEach((obj) => {
+	// 		dict.push(obj);
+	// 	});
+	// });
+	dict = data;
 };
 
 /**
