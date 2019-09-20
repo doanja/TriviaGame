@@ -28,4 +28,4 @@ This is a trivia game using JavaScript for the logic and jQuery to manipulate HT
 
 # License
 
-This work is Unlicensed under a (http://unlicense.org).
+This work is Unlicensed (http://unlicense.org).
