@@ -233,7 +233,7 @@ const initGlobals = () => {
 	dict = [];
 
 	// fill the dictionary with triva questions
-	loadDictionary('http://myjson.com/78c9h');
+	loadDictionary('https://api.myjson.com/bins/78c9h');
 };
 
 /**
