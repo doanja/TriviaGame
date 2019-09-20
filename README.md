@@ -25,3 +25,9 @@ This is a trivia game using JavaScript for the logic and jQuery to manipulate HT
 1. Clone the repository "https://github.com/doanja/TriviaGame.git" to your PC.
 
 2. Open index.html in your web browser to start playing.
+
+# License
+
+[![Creative Commons License](https://i.creativecommons.org/l/by-sa/4.0/88x31.png)](https://creativecommons.org/licenses/by-sa/4.0/)
+
+This work is licensed under a [Creative Commons Attribution-ShareAlike 4.0 International License](https://creativecommons.org/licenses/by-sa/4.0/).
